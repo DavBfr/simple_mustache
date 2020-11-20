@@ -30,9 +30,7 @@ class Mustache extends Converter<String, String> {
     this.map = const <String, dynamic>{},
     this.filters = const <String, MustacheFilter>{},
     this.debug = false,
-  })  : assert(map != null),
-        assert(filters != null),
-        assert(debug != null);
+  });
 
   /// Variable replacement map
   /// used to replace `{{ key }}` with the corresponding `value`
@@ -52,14 +50,14 @@ class Mustache extends Converter<String, String> {
 
   final _filter = RegExp(r'([\w\d_]+)\s*\|?\s*');
 
-  dynamic _applyFilters(dynamic value, List<String> _filters) {
+  dynamic _applyFilters(dynamic value, List<String?> _filters) {
     if (_filters.isEmpty) {
       return value;
     }
 
     for (final filter in _filters) {
       assert(filters.containsKey(filter), 'filter $filter not found');
-      value = filters[filter](value);
+      value = filters[filter!]!(value);
       assert(() {
         if (debug) {
           value = '$filter($value)';
@@ -76,7 +74,7 @@ class Mustache extends Converter<String, String> {
     final output = StringBuffer();
     var start = 0;
     var eat = false;
-    var eatField = '';
+    String? eatField = '';
     final context = <String, dynamic>{};
     var inputLoop = 0;
     var array = <dynamic>[];
@@ -94,9 +92,9 @@ class Mustache extends Converter<String, String> {
       final field = m.group(3);
       final _filters = <String>[];
 
-      if (m.group(4).isNotEmpty) {
-        for (final n in _filter.allMatches(m.group(4))) {
-          _filters.add(n.group(1));
+      if (m.group(4)!.isNotEmpty) {
+        for (final n in _filter.allMatches(m.group(4)!)) {
+          _filters.add(n.group(1)!);
         }
       }
 
@@ -140,7 +138,7 @@ class Mustache extends Converter<String, String> {
       if (modifier == '#') {
         output.write(input.substring(start, m.start));
         if (_map.containsKey(field)) {
-          dynamic value = _map[field];
+          dynamic value = _map[field!];
           if (value is bool) {
             eat = !value;
           } else {
@@ -177,7 +175,7 @@ class Mustache extends Converter<String, String> {
       if (modifier == '^') {
         output.write(input.substring(start, m.start));
         if (_map.containsKey(field)) {
-          final dynamic value = _map[field];
+          final dynamic value = _map[field!];
           if (value is bool) {
             eat = value;
           } else {
@@ -191,7 +189,7 @@ class Mustache extends Converter<String, String> {
 
       assert(_map.containsKey(field), 'field $field not found');
       output.write(input.substring(start, m.start));
-      dynamic value = _applyFilters(_map[field], _filters);
+      dynamic value = _applyFilters(_map[field!], _filters);
       assert(() {
         if (debug) {
           value = '[$field]($value)';
