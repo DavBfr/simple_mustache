@@ -1,11 +1,11 @@
 name: simple_mustache
 description: Dart implementation of a mustache subset for simple String templates with filters.
 homepage: https://github.com/DavBfr/simple_mustache
-author: David PHAM-VAN <dev.nfet.net@gmail.com>
-version: 2.0.0
+_author: David PHAM-VAN <dev.nfet.net@gmail.com>
+version: 2.1.0
 
 environment:
-  sdk: ">=2.12.0-29.7.beta <3.0.0"
+  sdk: ">=2.12.0 <3.0.0"
 
 dev_dependencies:
   pedantic:

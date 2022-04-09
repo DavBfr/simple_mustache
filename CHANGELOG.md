@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.0
+
+- Fix dart sdk constraints
+
 ## 2.0.0
 
 - Null-safe version
