@@ -3,6 +3,7 @@
 ## 2.1.0
 
 - Fix dart sdk constraints
+- Use flutter_lints
 
 ## 2.0.0
 
