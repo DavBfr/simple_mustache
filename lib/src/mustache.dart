@@ -7,6 +7,8 @@
 
 import 'dart:convert';
 
+import 'package:logging/logging.dart';
+
 /// The filter to apply to a variable
 typedef MustacheFilter = dynamic Function(dynamic value);
 
@@ -30,6 +32,7 @@ class Mustache extends Converter<String, String> {
     this.map = const <String, dynamic>{},
     this.filters = const <String, MustacheFilter>{},
     this.debug = false,
+    this.replace,
   });
 
   /// Variable replacement map
@@ -45,6 +48,8 @@ class Mustache extends Converter<String, String> {
   /// the actual replacement
   final bool debug;
 
+  final String Function(String key)? replace;
+
   final _mustache =
       RegExp(r'({{\s*([#/^!]?) *([\w\d_]*)\s*\|?\s*([\w\d\s_\|]*)}})');
 
@@ -56,7 +61,11 @@ class Mustache extends Converter<String, String> {
     }
 
     for (final filter in _filters) {
-      assert(filters.containsKey(filter), 'filter $filter not found');
+      if (!filters.containsKey(filter)) {
+        _log.warning('filter $filter not found');
+        continue;
+      }
+
       value = filters[filter!]!(value);
       assert(() {
         if (debug) {
@@ -187,9 +196,19 @@ class Mustache extends Converter<String, String> {
         continue;
       }
 
-      assert(_map.containsKey(field), 'field $field not found');
       output.write(input.substring(start, m.start));
-      dynamic value = _applyFilters(_map[field!], _filters);
+      dynamic value;
+      if (!_map.containsKey(field)) {
+        if (replace != null) {
+          value = replace!(field!);
+        } else {
+          _log.warning('field $field not found');
+          value = field;
+        }
+      } else {
+        value = _map[field!];
+      }
+      value = _applyFilters(value, _filters);
       assert(() {
         if (debug) {
           value = '[$field]($value)';
@@ -204,3 +223,5 @@ class Mustache extends Converter<String, String> {
     return output.toString();
   }
 }
+
+final _log = Logger('mustache');

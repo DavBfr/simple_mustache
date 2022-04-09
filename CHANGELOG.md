@@ -4,6 +4,7 @@
 
 - Fix dart sdk constraints
 - Use flutter_lints
+- Do not crash if the value is not found
 
 ## 2.0.0
 

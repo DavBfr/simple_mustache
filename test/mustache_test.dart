@@ -65,4 +65,58 @@ void main() {
       expect(output, equals('_ok_'));
     });
   });
+
+  group('Filters', () {
+    test('simple filter', () {
+      final output = Mustache(
+        map: <String, dynamic>{
+          'nine_eleven': 1000212400000,
+        },
+        filters: {
+          'date': (dynamic val) =>
+              DateTime.fromMillisecondsSinceEpoch(val).toUtc()
+        },
+      ).convert('{{  nine_eleven|date }}');
+      expect(output, equals('2001-09-11 12:46:40.000Z'));
+    });
+
+    test('Multiple filters', () {
+      final output = Mustache(
+        map: <String, dynamic>{
+          'nine_eleven': 1000212400,
+        },
+        filters: {
+          'ms': (dynamic val) => val * 1000,
+          'date': (dynamic val) =>
+              DateTime.fromMillisecondsSinceEpoch(val).toUtc()
+        },
+      ).convert('{{  nine_eleven|ms|date }}');
+      expect(output, equals('2001-09-11 12:46:40.000Z'));
+    });
+
+    test('Undefined filter', () {
+      final output = Mustache(
+        map: <String, dynamic>{'val': 42},
+        // filters: {},
+      ).convert('{{ val|date }}');
+      expect(output, equals('42'));
+    });
+  });
+
+  group('Recovery', () {
+    test('Undefined value', () {
+      final output = Mustache(
+        map: <String, dynamic>{'val': 42},
+      ).convert('{{ val }} {{ vvv }}');
+      expect(output, equals('42 vvv'));
+    });
+
+    test('Undefined value callback', () {
+      final output = Mustache(
+        map: <String, dynamic>{'val': 42},
+        replace: (key) => '~',
+      ).convert('{{ val }} {{ vvv }}');
+      expect(output, equals('42 ~'));
+    });
+  });
 }
